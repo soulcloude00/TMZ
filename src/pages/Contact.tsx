@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { Phone, Mail, MapPin, Facebook, Instagram, WhatsApp } from 'lucide-react';
+import { Phone, Mail, MapPin, Facebook, Instagram } from 'lucide-react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -259,9 +258,9 @@ const ContactPage = () => {
                   <a 
                     href="#" 
                     className="bg-tiara-gold/10 hover:bg-tiara-gold/20 rounded-full p-4 transition-colors"
-                    aria-label="WhatsApp"
+                    aria-label="Phone"
                   >
-                    <WhatsApp className="h-6 w-6 text-tiara-gold" />
+                    <Phone className="h-6 w-6 text-tiara-gold" />
                   </a>
                 </div>
               </div>
