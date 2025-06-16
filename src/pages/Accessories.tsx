@@ -1,7 +1,6 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Filter, Search, ShoppingCart, Heart } from 'lucide-react';
+import { Filter, Search, ShoppingCart, Heart, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -18,112 +17,10 @@ import {
   PaginationPrevious 
 } from '@/components/ui/pagination';
 
+import type { StockItem } from '@/pages/Admin'; // Import StockItem interface
+
 // Mock data for accessories
-const accessories = [
-  {
-    id: 1,
-    name: "20W Type-C Fast Charger",
-    price: 999,
-    image: "https://placehold.co/300x300/222/gold?text=Charger",
-    category: "Chargers",
-    brand: "Apple",
-    rating: 4.5,
-    reviews: 128,
-    inStock: true,
-    isNew: true
-  },
-  {
-    id: 2,
-    name: "Premium Phone Case - iPhone 15 Pro",
-    price: 1299,
-    image: "https://placehold.co/300x300/222/gold?text=Case",
-    category: "Cases",
-    brand: "Tiara",
-    rating: 4.8,
-    reviews: 86,
-    inStock: true,
-    isHot: true
-  },
-  {
-    id: 3,
-    name: "Wireless Earbuds With Noise Cancellation",
-    price: 3999,
-    image: "https://placehold.co/300x300/222/gold?text=Earbuds",
-    category: "Earphones",
-    brand: "Boat",
-    rating: 4.6,
-    reviews: 215,
-    inStock: true
-  },
-  {
-    id: 4,
-    name: "9D Tempered Glass Screen Protector",
-    price: 499,
-    image: "https://placehold.co/300x300/222/gold?text=Screen+Guard",
-    category: "Screen Guards",
-    brand: "Tiara",
-    rating: 4.3,
-    reviews: 94,
-    inStock: true
-  },
-  {
-    id: 5,
-    name: "Smart Watch with Heart Rate Monitor",
-    price: 4999,
-    image: "https://placehold.co/300x300/222/gold?text=Smartwatch",
-    category: "Smartwatches",
-    brand: "Samsung",
-    rating: 4.7,
-    reviews: 152,
-    inStock: true,
-    isNew: true
-  },
-  {
-    id: 6,
-    name: "Premium Braided USB-C Cable - 2m",
-    price: 799,
-    image: "https://placehold.co/300x300/222/gold?text=Cable",
-    category: "Cables",
-    brand: "Tiara",
-    rating: 4.4,
-    reviews: 67,
-    inStock: false
-  },
-  {
-    id: 7,
-    name: "10000mAh Power Bank",
-    price: 1499,
-    image: "https://placehold.co/300x300/222/gold?text=Power+Bank",
-    category: "Power Banks",
-    brand: "Xiaomi",
-    rating: 4.8,
-    reviews: 203,
-    inStock: true,
-    isHot: true
-  },
-  {
-    id: 8,
-    name: "Wireless Charging Pad - 15W",
-    price: 1299,
-    image: "https://placehold.co/300x300/222/gold?text=Charging+Pad",
-    category: "Chargers",
-    brand: "Samsung",
-    rating: 4.5,
-    reviews: 89,
-    inStock: true
-  },
-  {
-    id: 9,
-    name: "Bluetooth Headphones",
-    price: 2499,
-    image: "https://placehold.co/300x300/222/gold?text=Headphones",
-    category: "Earphones",
-    brand: "Boat",
-    rating: 4.2,
-    reviews: 76,
-    inStock: true
-  }
-];
+// const accessories = [ ... ]; // REMOVE all dummy data
 
 // Types
 interface FilterState {
@@ -133,6 +30,14 @@ interface FilterState {
   inStock: boolean | null;
 }
 
+// Unique glassmorphism style
+const glassCard = "backdrop-blur-md bg-white/30 border border-white/20 shadow-xl rounded-2xl transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:bg-white/40";
+const chipBase = "px-3 py-1 rounded-full text-xs font-semibold shadow transition-transform duration-200 cursor-pointer mr-2 mb-2 border border-tiara-gold/40";
+const chipSelected = "bg-tiara-gold text-black border-tiara-gold scale-110";
+const chipUnselected = "bg-black/40 text-tiara-gold hover:bg-tiara-gold/20 hover:text-tiara-gold";
+
+const categoryList = ['Chargers','Cases','Earphones','Screen Guards','Smartwatches','Cables','Power Banks'];
+
 const AccessoriesPage = () => {
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
@@ -141,16 +46,25 @@ const AccessoriesPage = () => {
     inStock: null
   });
   const [page, setPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 12;
+  const [spotlightAccessory, setSpotlightAccessory] = useState<StockItem | null>(null); // Add state for spotlighted accessory
 
-  // Mock query to fetch accessories
-  const { data = accessories, isLoading } = useQuery({
-    queryKey: ['accessories'],
-    queryFn: () => Promise.resolve(accessories)
+  // Fetch accessories from the backend
+  const { data: stockItems = [], isLoading } = useQuery<StockItem[]> ({
+    queryKey: ['stockItems'], // Use a more general key since we fetch all stock
+    queryFn: async () => {
+      const response = await fetch('http://localhost:3001/api/stock');
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    }
   });
 
-  // Filter accessories based on selected filters
-  const filteredAccessories = data.filter(item => {
+  // Filter to show only accessories and apply other filters
+  const accessories = stockItems.filter(item => item.type === 'accessory');
+
+  const filteredAccessories = accessories.filter(item => {
     // Check category filter
     if (filters.categories.length > 0 && !filters.categories.includes(item.category)) {
       return false;
@@ -168,6 +82,9 @@ const AccessoriesPage = () => {
     
     return true;
   });
+
+  // Dynamically generate brand list from filtered accessories
+  const accessoryBrands = Array.from(new Set(accessories.map(item => item.brand)));
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredAccessories.length / itemsPerPage);
@@ -203,216 +120,163 @@ const AccessoriesPage = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-black">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-black via-gray-900 to-black">
       <NavBar />
-      
-      {/* Hero Section */}
-      <div className="bg-gradient-to-b from-black to-gray-900 pt-24 pb-8 px-4 md:px-6">
-        <div className="container mx-auto">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-            Mobile Accessories
-          </h1>
-          <p className="text-gray-400">
-            Enhance your mobile experience with our premium accessories
-          </p>
-        </div>
-      </div>
-      
-      {/* Deals of the Week Banner */}
-      <div className="container mx-auto px-4 md:px-6 py-4">
-        <div className="bg-gray-900 border border-tiara-gold rounded-lg p-6 mb-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div>
-              <h2 className="text-2xl font-bold text-tiara-gold mb-2">
-                Deals of the Week
-              </h2>
-              <p className="text-white mb-4 md:mb-0">
-                Get up to 40% off on selected accessories!
-              </p>
-            </div>
-            <Button className="bg-tiara-gold text-black hover:bg-tiara-lightgold">
-              Shop Now
-            </Button>
-          </div>
-        </div>
-      </div>
-      
-      {/* Main Content with Filters and Products */}
-      <div className="container mx-auto px-4 md:px-6 flex-grow py-4">
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Filters - Desktop View */}
-          <div className="hidden lg:block w-1/4 sticky top-24">
-            <AccessoriesFilters 
-              filters={filters} 
-              onFilterChange={handleFilterChange} 
-            />
-          </div>
-          
-          {/* Filters - Mobile View */}
-          <div className="lg:hidden mb-4 flex justify-between items-center">
-            <div className="relative w-full max-w-sm mr-2">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <input
-                type="text"
-                placeholder="Search accessories..."
-                className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-900 text-white border border-gray-800 focus:border-tiara-gold focus:outline-none"
-              />
-            </div>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="text-white border-gray-700">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filters
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="bg-gray-900 border-r border-gray-800 w-[300px] sm:w-[360px]">
-                <AccessoriesFilters 
-                  filters={filters} 
-                  onFilterChange={handleFilterChange} 
-                  onClose={() => document.querySelector('[data-state="open"]')?.dispatchEvent(new MouseEvent('click', {bubbles: true}))}
+      {spotlightAccessory ? (
+        // Spotlight View
+        <div className="min-h-screen flex flex-col bg-gradient-to-br from-black via-gray-900 to-black transition-all duration-700 pt-24">
+          <NavBar />
+          {/* Animated background particles - Optional, can add if desired */}
+          {/* <div className="pointer-events-none fixed inset-0 z-0">
+            {[...Array(12)].map((_, i) => (
+              <div key={i} className={`absolute rounded-full bg-tiara-gold/10 blur-2xl animate-particle${i%3+1}`} style={{
+                width: `${40 + (i%3)*20}px`, height: `${40 + (i%3)*20}px`,
+                left: `${(i*8)%100}%`, top: `${(i*13)%100}%`, opacity: 0.5
+              }} />
+            ))}
+          </div> */}
+          <div className="flex-1 flex items-center justify-center px-4 py-16 animate-fade-in relative">
+            <div className="flex flex-col md:flex-row items-center gap-8 bg-black/60 rounded-3xl shadow-2xl p-8 md:p-10 max-w-3xl w-full relative">
+              {/* Close button */}
+              <button aria-label="Close Spotlight" className="absolute top-4 right-4 text-white/70 hover:text-tiara-gold text-2xl bg-black/60 rounded-full p-2 focus:outline-none focus:ring-2 focus:ring-tiara-gold z-20" onClick={() => setSpotlightAccessory(null)}><X size={24} /></button>
+              
+              {/* Left: Image */}
+              <div className="w-full md:w-1/3 flex-shrink-0 flex items-center justify-center">
+                <img 
+                  src={spotlightAccessory.image}
+                  alt={`Spotlight view of ${spotlightAccessory.name}`}
+                  className="w-48 h-48 object-contain rounded-2xl shadow-lg bg-gray-800"
                 />
-              </SheetContent>
-            </Sheet>
-          </div>
-          
-          {/* Product Grid */}
-          <div className="lg:w-3/4">
-            {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-gray-900 rounded-lg h-80 animate-pulse"></div>
-                ))}
               </div>
-            ) : (
-              <>
-                {filteredAccessories.length === 0 ? (
-                  <div className="text-center py-12">
-                    <p className="text-gray-400 text-lg">No accessories match your filters.</p>
-                    <Button 
-                      variant="outline" 
-                      className="mt-4 border-tiara-gold text-tiara-gold hover:bg-tiara-gold hover:text-black"
-                      onClick={() => setFilters({
-                        categories: [],
-                        brands: [],
-                        priceRanges: [],
-                        inStock: null
-                      })}
-                    >
-                      Clear All Filters
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {paginatedAccessories.map((accessory) => (
-                      <Card key={accessory.id} className="product-card bg-gray-900 border-gray-800 text-white overflow-hidden">
-                        {/* Product Image */}
-                        <div className="relative aspect-square overflow-hidden">
-                          <img 
-                            src={accessory.image} 
-                            alt={accessory.name} 
-                            className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
-                          />
-                          
-                          {/* Tags */}
-                          <div className="absolute top-2 left-2 flex flex-col gap-2">
-                            {accessory.isNew && (
-                              <Badge className="bg-tiara-gold text-black font-semibold">NEW</Badge>
-                            )}
-                            {accessory.isHot && (
-                              <Badge className="bg-red-500 text-white font-semibold">HOT</Badge>
-                            )}
-                            {!accessory.inStock && (
-                              <Badge variant="outline" className="bg-gray-900/80 text-white border-gray-600">
-                                Out of Stock
-                              </Badge>
-                            )}
-                          </div>
-                          
-                          {/* Wishlist Button */}
-                          <button className="absolute top-2 right-2 bg-black/30 p-2 rounded-full transition-colors hover:bg-black/50">
-                            <Heart className="h-5 w-5 text-white hover:text-tiara-gold transition-colors" />
-                          </button>
-                        </div>
-                        
-                        <CardContent className="p-4">
-                          <h3 className="font-semibold text-lg mb-1 line-clamp-2">{accessory.name}</h3>
-                          
-                          <div className="flex items-center mb-2">
-                            <div className="flex mr-1">{renderStars(accessory.rating)}</div>
-                            <span className="text-sm text-gray-400">({accessory.reviews})</span>
-                          </div>
-                          
-                          <p className="text-tiara-gold font-semibold">₹{accessory.price.toLocaleString()}</p>
-                          
-                          {accessory.inStock && accessory.id === 7 && (
-                            <p className="text-sm text-red-400 mt-1">Only 3 left!</p>
-                          )}
-                        </CardContent>
-                        
-                        <CardFooter className="p-4 pt-0">
-                          <Button 
-                            className="w-full bg-tiara-gold text-black hover:bg-tiara-lightgold"
-                            disabled={!accessory.inStock}
-                          >
-                            <ShoppingCart className="mr-2 h-4 w-4" />
-                            Add to Cart
-                          </Button>
-                        </CardFooter>
-                      </Card>
-                    ))}
+
+              {/* Right: Product Info and Specs */}
+              <div className="flex flex-col items-center md:items-start w-full md:w-2/3 text-center md:text-left">
+                <h2 className="text-3xl font-bold text-white mb-2">{spotlightAccessory.name}</h2>
+                <Badge className="bg-tiara-gold/20 text-tiara-gold border border-tiara-gold mb-4">{spotlightAccessory.brand}</Badge>
+
+                <div className="text-2xl font-bold text-tiara-gold mb-4">₹{spotlightAccessory.price.toLocaleString()}</div>
+
+                {/* Specs Table (adapted from Mobile Spotlight) */}
+                {spotlightAccessory.features && typeof spotlightAccessory.features === 'string' && JSON.parse(spotlightAccessory.features).length > 0 && (
+                  <div className="w-full bg-black/40 rounded-lg p-4 mt-2">
+                    <table className="w-full text-left text-white">
+                      <tbody>
+                        {JSON.parse(spotlightAccessory.features).map((spec: { label: string; value: string }, i: number) => (
+                           typeof spec === 'object' && spec.label && spec.value ? (
+                            <tr key={spec.label + spec.value + i}>
+                              <td className="pr-4 font-semibold text-tiara-gold uppercase w-32">{spec.label}</td>
+                              <td className="text-white">{spec.value}</td>
+                            </tr>
+                          ) : null
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
-                
-                {/* Pagination */}
-                {filteredAccessories.length > 0 && totalPages > 1 && (
-                  <Pagination className="mt-8">
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious 
-                          href="#" 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            if (page > 1) setPage(page - 1);
-                          }} 
-                          className={page === 1 ? "pointer-events-none opacity-50" : ""}
-                        />
-                      </PaginationItem>
-                      
-                      {[...Array(totalPages)].map((_, i) => (
-                        <PaginationItem key={i}>
-                          <PaginationLink 
-                            href="#" 
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setPage(i + 1);
-                            }} 
-                            isActive={page === i + 1}
-                            className={page === i + 1 ? "bg-tiara-gold text-black" : "text-white"}
-                          >
-                            {i + 1}
-                          </PaginationLink>
-                        </PaginationItem>
-                      ))}
-                      
-                      <PaginationItem>
-                        <PaginationNext 
-                          href="#" 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            if (page < totalPages) setPage(page + 1);
-                          }} 
-                          className={page === totalPages ? "pointer-events-none opacity-50" : ""}
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
-                )}
-              </>
-            )}
+
+                {/* Add to Cart Button */}
+                <Button 
+                  className="w-full mt-6 font-semibold shadow hover:scale-105 transition-transform bg-gradient-to-r from-tiara-gold to-yellow-300 animate-fade-in-up text-black"
+                  onClick={() => alert('Add to cart!')} // Replace with actual add to cart logic
+                >
+                  Add to Cart
+                </Button>
+              </div>
+            </div>
           </div>
+          <Footer />
         </div>
-      </div>
-      
+      ) : (
+        // Normal Accessories List View
+        <main className="flex-1 w-full max-w-7xl mx-auto pt-24 pb-16 px-4">
+          <section className="mb-10">
+            <h1 className="text-4xl font-bold text-white mb-2">Accessories</h1>
+            <p className="text-gray-300 text-lg mb-6 max-w-2xl">Discover unique accessories to complement your mobile lifestyle. Handpicked, stylish, and functional—find your next favorite here!</p>
+            <div className="flex flex-wrap gap-2 mb-6">
+              {categoryList.map(cat => (
+                <span
+                  key={cat}
+                  className={
+                    chipBase + ' ' + (filters.categories.includes(cat) ? chipSelected : chipUnselected)
+                  }
+                  onClick={() => {
+                    const newCategories = filters.categories.includes(cat)
+                      ? filters.categories.filter(c => c !== cat)
+                      : [...filters.categories, cat];
+                    handleFilterChange({ ...filters, categories: newCategories });
+                  }}
+                >
+                  {cat}
+                </span>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2 mb-8">
+              {accessoryBrands.map(brand => (
+                <span
+                  key={brand}
+                  className={
+                    chipBase + ' ' + (filters.brands.includes(brand) ? chipSelected : chipUnselected)
+                  }
+                  onClick={() => {
+                    const newBrands = filters.brands.includes(brand)
+                      ? filters.brands.filter(b => b !== brand)
+                      : [...filters.brands, brand];
+                    handleFilterChange({ ...filters, brands: newBrands });
+                  }}
+                >
+                  {brand}
+                </span>
+              ))}
+            </div>
+          </section>
+          <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+            {filteredAccessories.slice(start, end).map(item => (
+              <div 
+                key={item.id} 
+                className="bg-black/70 rounded-2xl shadow-lg p-6 flex flex-col items-center mb-6 break-inside-avoid animate-fade-in-up group relative overflow-hidden cursor-pointer"
+                style={{ minHeight: 320 }}
+                onClick={() => setSpotlightAccessory(item)} // Add click handler to open spotlight
+              >
+                <img src={item.image} alt={item.name} className="w-full h-48 object-cover rounded-xl mb-4 shadow-md group-hover:scale-105 transition-transform duration-300 bg-gray-800" onError={(e) => { e.currentTarget.src = '/fallback-charger.png'; }} />
+                <div className="absolute top-4 right-4 z-10">
+                  <Button size="icon" variant="ghost" className="rounded-full bg-white/10 hover:bg-tiara-gold/80 transition-colors shadow-lg">
+                    <Heart className="w-5 h-5 text-red-400 group-hover:scale-125 transition-transform" />
+                  </Button>
+                </div>
+                <h3 className="text-xl font-bold mb-1 text-white drop-shadow text-center">{item.name}</h3>
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge variant="secondary">{item.category}</Badge>
+                  <Badge className="bg-tiara-gold/20 text-tiara-gold border border-tiara-gold">{item.brand}</Badge>
+                  {item.isNew && <Badge className="bg-green-400/80 text-white">New</Badge>}
+                  {item.isHot && <Badge className="bg-red-400/80 text-white">Hot</Badge>}
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-tiara-gold text-lg font-bold">₹{item.price}</span>
+                  <span className="ml-2 text-gray-400 text-sm">{renderStars(item.rating)} ({item.reviews})</span>
+                </div>
+                <Button className="w-full mt-2 font-semibold shadow hover:scale-105 transition-transform bg-gradient-to-r from-tiara-gold to-yellow-300 animate-fade-in-up text-black" onClick={() => alert('Add to cart!')}>Add to Cart</Button>
+              </div>
+            ))}
+          </section>
+          <div className="mt-12 flex justify-center">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious onClick={() => setPage(Math.max(1, page - 1))} />
+                </PaginationItem>
+                {[...Array(totalPages)].map((_, i) => (
+                  <PaginationItem key={i}>
+                    <PaginationLink isActive={page === i + 1} onClick={() => setPage(i + 1)}>{i + 1}</PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext onClick={() => setPage(Math.min(totalPages, page + 1))} />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        </main>
+      )}
       <Footer />
     </div>
   );

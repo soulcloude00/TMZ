@@ -1,49 +1,37 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ShoppingBag } from 'lucide-react';
 
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-  category: string;
-}
+import type { StockItem } from '@/pages/Admin'; // Import StockItem interface
 
-const FEATURED_PRODUCTS: Product[] = [
-  {
-    id: 1,
-    name: "iPhone 15 Pro Max",
-    price: 1299,
-    image: "https://images.unsplash.com/photo-1631281956016-3cdc1b2fe5fb?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    category: "mobiles"
-  },
-  {
-    id: 2,
-    name: "Samsung Galaxy S23 Ultra",
-    price: 1199,
-    image: "https://images.unsplash.com/photo-1678911820864-e2c567c655d7?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    category: "mobiles"
-  },
-  {
-    id: 3,
-    name: "Google Pixel 7 Pro",
-    price: 899,
-    image: "https://images.unsplash.com/photo-1664478546384-d57ffe74a78c?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    category: "mobiles"
-  },
-  {
-    id: 4,
-    name: "AirPods Pro",
-    price: 249,
-    image: "https://images.unsplash.com/photo-1603351154351-5e2d0600bb77?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    category: "accessories"
-  }
-];
+// Removed local Product interface - using StockItem instead
+// interface Product { ... }
+
+// Removed mock data
+// const FEATURED_PRODUCTS: Product[] = [ ... ];
+
+const API_URL = 'http://localhost:3001/api'; // Define API_URL if not already defined globally
 
 const FeaturedProducts = () => {
+  const [products, setProducts] = useState<StockItem[]>([]); // Use StockItem[] for state
   const [addedToCart, setAddedToCart] = useState<Record<number, boolean>>({});
+
+  // Fetch stock items from the backend
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch(`${API_URL}/stock`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data: StockItem[] = await response.json();
+        setProducts(data); // Set fetched data
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
+    fetchProducts();
+  }, []); // Empty dependency array to fetch only once on mount
 
   const handleAddToCart = (productId: number) => {
     setAddedToCart((prev) => ({
@@ -68,7 +56,7 @@ const FeaturedProducts = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 animate-fade-in">
-          {FEATURED_PRODUCTS.map((product) => (
+          {products.map((product) => (
             <div key={product.id} className="product-card bg-gray-900 p-4 animate-slide-up">
               <div className="aspect-square overflow-hidden rounded-lg mb-4">
                 <img
@@ -81,9 +69,9 @@ const FeaturedProducts = () => {
               <h3 className="text-white font-medium text-lg mb-1">{product.name}</h3>
               
               <div className="flex items-center justify-between mb-4">
-                <p className="text-tiara-gold font-semibold">${product.price}</p>
+                <p className="text-tiara-gold font-semibold">₹{product.price.toLocaleString()}</p> {/* Use toLocaleString for currency formatting */}
                 <span className="text-xs text-gray-400 uppercase tracking-wider bg-gray-800 px-2 py-1 rounded">
-                  {product.category}
+                  {product.type}
                 </span>
               </div>
               

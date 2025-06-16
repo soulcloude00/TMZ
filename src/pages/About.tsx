@@ -1,30 +1,45 @@
-
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Phone, Mail, ChevronDown } from 'lucide-react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
+import Orders from "./Orders";
+
+// CSS for flip card effect
+const flipCardStyles = `
+  .flip-card {
+    perspective: 1000px;
+    height: 300px;
+  }
+  .flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+  }
+  .flip-card:hover .flip-card-inner {
+    transform: rotateY(180deg);
+  }
+  .flip-card-front, .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+  }
+  .flip-card-back {
+    transform: rotateY(180deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 8px;
+  }
+`;
 
 const AboutPage = () => {
-  useEffect(() => {
-    // Simple scroll animation for elements with .animate-on-scroll class
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('animate-fade-in');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.animate-on-scroll').forEach((el) => {
-      observer.observe(el);
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <div className="flex flex-col min-h-screen bg-black">
+      <style>{flipCardStyles}</style>
       <NavBar />
       
       {/* Hero Section */}
@@ -56,12 +71,12 @@ const AboutPage = () => {
       {/* Our Story Section */}
       <section className="py-16 px-4 md:px-6 bg-gradient-to-b from-black to-gray-900">
         <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-center text-white mb-12 animate-on-scroll opacity-0">
+          <h2 className="text-3xl font-bold text-center text-white mb-12 transition-opacity duration-500">
             Our <span className="text-tiara-gold">Story</span>
           </h2>
           
           <div className="grid md:grid-cols-2 gap-10 items-center">
-            <div className="animate-on-scroll opacity-0">
+            <div className="transition-opacity duration-500">
               <h3 className="text-xl font-semibold text-tiara-gold mb-4">How We Started</h3>
               <p className="text-gray-300 mb-6">
                 Tiara Mobile Zone began as a small kiosk in a busy market in 2015. 
@@ -76,7 +91,7 @@ const AboutPage = () => {
               </p>
             </div>
             
-            <div className="relative animate-on-scroll opacity-0">
+            <div className="relative transition-opacity duration-500">
               <img 
                 src="https://placehold.co/600x400/222/gold?text=Store+Image" 
                 alt="Tiara Mobile Zone Store" 
@@ -87,7 +102,7 @@ const AboutPage = () => {
           </div>
           
           <div className="grid md:grid-cols-2 gap-10 items-center mt-20">
-            <div className="order-2 md:order-1 relative animate-on-scroll opacity-0">
+            <div className="order-2 md:order-1 relative transition-opacity duration-500">
               <img 
                 src="https://placehold.co/600x400/222/gold?text=Mission+Image" 
                 alt="Our Mission" 
@@ -96,7 +111,7 @@ const AboutPage = () => {
               <div className="absolute -top-4 -left-4 h-24 w-24 border-4 border-tiara-gold rounded-lg z-[-1]"></div>
             </div>
             
-            <div className="order-1 md:order-2 animate-on-scroll opacity-0">
+            <div className="order-1 md:order-2 transition-opacity duration-500">
               <h3 className="text-xl font-semibold text-tiara-gold mb-4">Our Mission</h3>
               <p className="text-gray-300 mb-6">
                 Our mission is to bridge the gap between cutting-edge mobile technology 
@@ -116,13 +131,13 @@ const AboutPage = () => {
       {/* Key Highlights */}
       <section className="py-16 px-4 md:px-6 bg-gray-900">
         <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-center text-white mb-12 animate-on-scroll opacity-0">
+          <h2 className="text-3xl font-bold text-center text-white mb-12 transition-opacity duration-500">
             Why Choose <span className="text-tiara-gold">Tiara Mobile Zone</span>
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Highlight 1 */}
-            <div className="bg-black/50 p-6 rounded-lg border border-gray-800 hover:border-tiara-gold transition-all duration-300 animate-on-scroll opacity-0">
+            <div className="bg-black/50 p-6 rounded-lg border border-gray-800 hover:border-tiara-gold transition-all duration-300">
               <div className="bg-tiara-gold/10 rounded-full p-4 w-16 h-16 flex items-center justify-center mb-4">
                 <span className="text-2xl text-tiara-gold">🛒</span>
               </div>
@@ -133,7 +148,7 @@ const AboutPage = () => {
             </div>
             
             {/* Highlight 2 */}
-            <div className="bg-black/50 p-6 rounded-lg border border-gray-800 hover:border-tiara-gold transition-all duration-300 animate-on-scroll opacity-0">
+            <div className="bg-black/50 p-6 rounded-lg border border-gray-800 hover:border-tiara-gold transition-all duration-300">
               <div className="bg-tiara-gold/10 rounded-full p-4 w-16 h-16 flex items-center justify-center mb-4">
                 <span className="text-2xl text-tiara-gold">🤝</span>
               </div>
@@ -144,7 +159,7 @@ const AboutPage = () => {
             </div>
             
             {/* Highlight 3 */}
-            <div className="bg-black/50 p-6 rounded-lg border border-gray-800 hover:border-tiara-gold transition-all duration-300 animate-on-scroll opacity-0">
+            <div className="bg-black/50 p-6 rounded-lg border border-gray-800 hover:border-tiara-gold transition-all duration-300">
               <div className="bg-tiara-gold/10 rounded-full p-4 w-16 h-16 flex items-center justify-center mb-4">
                 <span className="text-2xl text-tiara-gold">⚡</span>
               </div>
@@ -155,7 +170,7 @@ const AboutPage = () => {
             </div>
             
             {/* Highlight 4 */}
-            <div className="bg-black/50 p-6 rounded-lg border border-gray-800 hover:border-tiara-gold transition-all duration-300 animate-on-scroll opacity-0">
+            <div className="bg-black/50 p-6 rounded-lg border border-gray-800 hover:border-tiara-gold transition-all duration-300">
               <div className="bg-tiara-gold/10 rounded-full p-4 w-16 h-16 flex items-center justify-center mb-4">
                 <span className="text-2xl text-tiara-gold">🛠️</span>
               </div>
@@ -171,57 +186,108 @@ const AboutPage = () => {
       {/* Team Section */}
       <section className="py-16 px-4 md:px-6 bg-black">
         <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-center text-white mb-12 animate-on-scroll opacity-0">
+          <h2 className="text-3xl font-bold text-center text-white mb-12 transition-opacity duration-500">
             Meet Our <span className="text-tiara-gold">Team</span>
           </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Team Member 1 */}
-            <div className="text-center animate-on-scroll opacity-0">
-              <div className="relative mb-6 mx-auto w-48 h-48 overflow-hidden rounded-full border-4 border-tiara-gold">
-                <img 
-                  src="https://placehold.co/300x300/222/gold?text=Founder" 
-                  alt="Founder" 
-                  className="w-full h-full object-cover"
-                />
+          <style>{`
+            .team-row {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              gap: 3rem;
+              width: 100%;
+              margin: 0 auto;
+              flex-wrap: wrap;
+            }
+            .team-card {
+              width: 180px;
+              flex: 0 0 auto;
+            }
+          `}</style>
+          <div className="team-row">
+            {/* Founder */}
+            <div className="text-center flip-card team-card">
+              <div className="flip-card-inner">
+                <div className="flip-card-front">
+                  <div className="relative mb-2 mx-auto w-28 h-28 overflow-hidden rounded-full border-4 border-tiara-gold">
+                    <img 
+                      src="https://placehold.co/300x300/222/gold?text=Founder" 
+                      alt="Founder" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-1">SRINIVASAN</h3>
+                  <p className="text-tiara-gold font-medium mb-1">Founder & CEO</p>
+                </div>
+                <div className="flip-card-back">
+                  <p className="text-gray-400 max-w-xs mx-auto text-sm">
+                    Tech enthusiast with over 10 years of experience in the mobile industry.
+                  </p>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-1">Rahul Sharma</h3>
-              <p className="text-tiara-gold font-medium mb-3">Founder & CEO</p>
-              <p className="text-gray-400 max-w-xs mx-auto">
-                Tech enthusiast with over 10 years of experience in the mobile industry.
-              </p>
             </div>
-            
-            {/* Team Member 2 */}
-            <div className="text-center animate-on-scroll opacity-0">
-              <div className="relative mb-6 mx-auto w-48 h-48 overflow-hidden rounded-full border-4 border-tiara-gold">
-                <img 
-                  src="https://placehold.co/300x300/222/gold?text=Co-Founder" 
-                  alt="Co-Founder" 
-                  className="w-full h-full object-cover"
-                />
+            {/* Co-Founder */}
+            <div className="text-center flip-card team-card">
+              <div className="flip-card-inner">
+                <div className="flip-card-front">
+                  <div className="relative mb-2 mx-auto w-28 h-28 overflow-hidden rounded-full border-4 border-tiara-gold">
+                    <img 
+                      src="https://placehold.co/300x300/222/gold?text=Co-Founder" 
+                      alt="Co-Founder" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-1">KAVITHA</h3>
+                  <p className="text-tiara-gold font-medium mb-1">Co-Founder & COO</p>
+                </div>
+                <div className="flip-card-back">
+                  <p className="text-gray-400 max-w-xs mx-auto text-sm">
+                    Operations expert who ensures seamless customer experience across all channels.
+                  </p>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-1">Priya Patel</h3>
-              <p className="text-tiara-gold font-medium mb-3">Co-Founder & COO</p>
-              <p className="text-gray-400 max-w-xs mx-auto">
-                Operations expert who ensures seamless customer experience across all channels.
-              </p>
             </div>
-            
-            {/* Team Member 3 */}
-            <div className="text-center animate-on-scroll opacity-0">
-              <div className="relative mb-6 mx-auto w-48 h-48 overflow-hidden rounded-full border-4 border-tiara-gold">
-                <img 
-                  src="https://placehold.co/300x300/222/gold?text=Tech+Lead" 
-                  alt="Tech Lead" 
-                  className="w-full h-full object-cover"
-                />
+            {/* Manager */}
+            <div className="text-center flip-card team-card">
+              <div className="flip-card-inner">
+                <div className="flip-card-front">
+                  <div className="relative mb-2 mx-auto w-28 h-28 overflow-hidden rounded-full border-4 border-tiara-gold">
+                    <img 
+                      src="https://placehold.co/300x300/222/gold?text=Manager" 
+                      alt="Manager" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-1">HARSHITHA</h3>
+                  <p className="text-tiara-gold font-medium mb-1">Manager</p>
+                </div>
+                <div className="flip-card-back">
+                  <p className="text-gray-400 max-w-xs mx-auto text-sm">
+                    Experienced manager dedicated to ensuring smooth operations and customer satisfaction.
+                  </p>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-1">Vikram Singh</h3>
-              <p className="text-tiara-gold font-medium mb-3">Technical Director</p>
-              <p className="text-gray-400 max-w-xs mx-auto">
-                Mobile tech specialist who tests and vets every product in our catalog.
-              </p>
+            </div>
+            {/* Technical Director */}
+            <div className="text-center flip-card team-card">
+              <div className="flip-card-inner">
+                <div className="flip-card-front">
+                  <div className="relative mb-2 mx-auto w-28 h-28 overflow-hidden rounded-full border-4 border-tiara-gold">
+                    <img 
+                      src="https://placehold.co/300x300/222/gold?text=Tech+Lead" 
+                      alt="Tech Lead" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-1">SHAHARSH</h3>
+                  <p className="text-tiara-gold font-medium mb-1">Technical Director</p>
+                </div>
+                <div className="flip-card-back">
+                  <p className="text-gray-400 max-w-xs mx-auto text-sm">
+                    Mobile tech specialist who tests and vets every product in our catalog.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -230,11 +296,11 @@ const AboutPage = () => {
       {/* Quick Contact Section */}
       <section className="py-12 px-4 md:px-6 bg-gray-900">
         <div className="container mx-auto text-center">
-          <h2 className="text-2xl font-bold text-white mb-8 animate-on-scroll opacity-0">
+          <h2 className="text-2xl font-bold text-white mb-8 transition-opacity duration-500">
             Have Questions? <span className="text-tiara-gold">Get in Touch</span>
           </h2>
           
-          <div className="flex flex-col md:flex-row justify-center items-center gap-8 animate-on-scroll opacity-0">
+          <div className="flex flex-col md:flex-row justify-center items-center gap-8 transition-opacity duration-500">
             <a href="tel:+911234567890" className="flex items-center gap-3 text-gray-300 hover:text-tiara-gold transition-colors">
               <Phone className="h-5 w-5 text-tiara-gold" />
               <span>+91 1234 567 890</span>
